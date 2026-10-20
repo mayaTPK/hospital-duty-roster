@@ -1,0 +1,20 @@
+{
+  "name": "hospital-duty-roster",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hospital duty roster web application",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test",
+    "create-sample-db": "node scripts/create-sample-database.js",
+    "create-admin": "node scripts/create-account.js admin"
+  },
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}
