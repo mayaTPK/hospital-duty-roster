@@ -263,7 +263,7 @@ function serializeRoster(roster, published = false) {
   const staffTable = published ? 'published_roster_staff' : 'roster_staff';
   const entriesTable = published ? 'published_roster_entries' : 'roster_entries';
   const staff = db.prepare(`
-    SELECT users.id, users.username, ${staffTable}.sort_order
+    SELECT users.id, users.username, users.role, ${staffTable}.sort_order
     FROM ${staffTable}
     JOIN users ON users.id = ${staffTable}.user_id
     WHERE ${staffTable}.roster_id = ?
@@ -812,10 +812,27 @@ app.get('/api/rosters/:id/staff-options', requireAuthentication, requireRosterRo
   const staff = db.prepare(`
     SELECT id, username
     FROM users
-    WHERE role = 'staff' AND department = ?
+    WHERE department = ?
       AND id NOT IN (SELECT user_id FROM roster_staff WHERE roster_id = ?)
+      AND (
+        role = 'staff' OR (
+          role = 'manager' AND EXISTS (
+            SELECT 1
+            FROM manager_scopes
+            WHERE manager_scopes.manager_id = users.id
+              AND manager_scopes.department = ?
+              AND ((manager_scopes.ward IS NULL AND ? IS NULL) OR manager_scopes.ward = ? COLLATE NOCASE)
+          )
+        )
+      )
     ORDER BY username COLLATE NOCASE
-  `).all(access.roster.department, rosterId);
+  `).all(
+    access.roster.department,
+    rosterId,
+    access.roster.department,
+    access.roster.ward,
+    access.roster.ward
+  );
   res.json({ staff });
 });
 
@@ -841,12 +858,16 @@ app.post('/api/rosters/:id/staff', requireSameOrigin, requireAuthentication, req
     res.status(404).json({ error: 'Staff account not found.' });
     return;
   }
-  if (user.role !== 'staff') {
-    res.status(400).json({ error: 'Only staff accounts can be added to a roster.' });
+  if (!['staff', 'manager'].includes(user.role)) {
+    res.status(400).json({ error: 'Only staff or managers assigned to this roster can be added.' });
     return;
   }
   if (user.department !== access.roster.department) {
-    res.status(400).json({ error: 'Staff can only be added to rosters for their registered department.' });
+    res.status(400).json({ error: 'Accounts can only be added to rosters for their registered department.' });
+    return;
+  }
+  if (user.role === 'manager' && !managerHasScope(user.id, access.roster)) {
+    res.status(400).json({ error: 'Only managers assigned to this roster can be added.' });
     return;
   }
   const nextOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) + 1 AS value FROM roster_staff WHERE roster_id = ?')

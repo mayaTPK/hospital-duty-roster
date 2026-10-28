@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Upload hospital duty roster to GitHub",
+			"type": "shell",
+			"command": "git init -b main; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git add .gitignore README.md DEVELOPER-GUIDE.md duty-roster-handoff.md duty-roster-ui.html db.js server.js package.json package-lock.json assets scripts test; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git -c user.name='Mayamiko Chaponda' -c user.email='144695379+mayaTPK@users.noreply.github.com' commit -m 'Upload hospital duty roster source' -m ('Co-authored-by: Copilot ' + [char]60 + '223556219+Copilot@users.noreply.github.com' + [char]62); if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git remote add origin https://github.com/mayaTPK/hospital-duty-roster.git; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git push -u origin main; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

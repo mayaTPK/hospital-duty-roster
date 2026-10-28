@@ -825,14 +825,14 @@ function sheet() {
     overlay.innerHTML = `<div class="bk" data-a="close"><div class="panel panel-wide">
       <h3>Manage roster staff</h3><p>${esc(dept)}${dept === 'Nursing' ? ` · ${esc(ward)} ward` : ''}. Staff are shown in this order on the roster.</p>
       <div class="staff-list">${list.map((member, index) => `<div class="staff-item"><span class="staff-order">${index + 1}</span>
-        <b>${esc(member.username)}</b><div class="staff-actions">
+        <b>${esc(member.username)}${member.role === 'manager' ? ' <span class="badge">Manager</span>' : ''}</b><div class="staff-actions">
           <button class="icon-action" data-a="move-staff" data-v="${member.id}" data-dir="-1" aria-label="Move ${esc(member.username)} up" ${index === 0 ? 'disabled' : ''}>↑</button>
           <button class="icon-action" data-a="move-staff" data-v="${member.id}" data-dir="1" aria-label="Move ${esc(member.username)} down" ${index === list.length - 1 ? 'disabled' : ''}>↓</button>
           <button class="icon-action remove" data-a="remove-staff" data-v="${member.id}" aria-label="Remove ${esc(member.username)}">Remove</button>
         </div></div>`).join('')}</div>
-      <label for="new-staff">Add a registered staff member</label><div class="add-staff-row"><select id="new-staff" ${rosterStaffOptions.length ? '' : 'disabled'}>
+      <label for="new-staff">Add a staff member or assigned manager</label><div class="add-staff-row"><select id="new-staff" ${rosterStaffOptions.length ? '' : 'disabled'}>
         <option value="">${rosterStaffOptions.length ? 'Select a staff account' : 'No eligible staff accounts available'}</option>
-        ${rosterStaffOptions.map(member => `<option value="${member.id}">${esc(member.username)}</option>`).join('')}
+        ${rosterStaffOptions.map(member => `<option value="${member.id}">${esc(member.username)}${member.role === 'manager' ? ' (Manager)' : ''}</option>`).join('')}
       </select>
         <button class="sec" data-a="add-staff">Add</button></div>
       <div class="act"><button class="pri" data-a="close">Done</button></div>

@@ -525,6 +525,23 @@ test('limits roster drafts to assigned managers and gives staff published snapsh
   assert.equal(availableStaff.response.status, 200);
   assert.equal(availableStaff.payload.staff.some(account => account.id === staffRegistration.payload.user.id), false);
   assert.equal(availableStaff.payload.staff.some(account => account.id === otherStaffRegistration.payload.user.id), true);
+  assert.equal(availableStaff.payload.staff.some(account => account.id === managerRegistration.payload.user.id), true);
+
+  const addManager = await request(`/api/rosters/${rosterId}/staff`, {
+    method: 'POST',
+    cookie: managerCookie,
+    body: { userId: managerRegistration.payload.user.id }
+  });
+  assert.equal(addManager.response.status, 201);
+  assert.equal(addManager.payload.staff.some(account =>
+    account.id === managerRegistration.payload.user.id && account.role === 'manager'
+  ), true);
+  const availableAfterManagerAdded = await request(`/api/rosters/${rosterId}/staff-options`, {
+    cookie: managerCookie
+  });
+  assert.equal(availableAfterManagerAdded.payload.staff.some(account =>
+    account.id === managerRegistration.payload.user.id
+  ), false);
 
   const draftHidden = await request(rosterPath, { cookie: staffCookie });
   assert.equal(draftHidden.response.status, 404);
@@ -559,8 +576,14 @@ test('limits roster drafts to assigned managers and gives staff published snapsh
   assert.equal(published.payload.roster.status, 'published');
   const staffPublished = await request(rosterPath, { cookie: staffCookie });
   assert.equal(staffPublished.response.status, 200);
-  assert.equal(staffPublished.payload.entries[0].code, 'S');
-  assert.equal(staffPublished.payload.staff[0].isCurrentUser, true);
+  const publishedStaffMember = staffPublished.payload.staff.find(member =>
+    member.id === staffRegistration.payload.user.id
+  );
+  assert.ok(publishedStaffMember);
+  assert.equal(staffPublished.payload.entries.find(entry =>
+    entry.userId === staffRegistration.payload.user.id && entry.day === 1
+  ).code, 'S');
+  assert.equal(publishedStaffMember.isCurrentUser, true);
 
   const changeDraft = await request(`/api/rosters/${rosterId}/entries`, {
     method: 'PUT',

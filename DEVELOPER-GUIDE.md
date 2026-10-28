@@ -53,7 +53,7 @@ The `data/` folder is private application data and should not be copied into sou
    - Remove an assignment or return a manager to the staff role from the same screen.
 2. **Manager**
    - Sign in and use **Overview** to open an assigned scope.
-   - Select the roster month, add registered staff, reorder or remove roster members, and edit shifts.
+   - Select the roster month, add registered staff or managers assigned to that exact team, reorder or remove roster members, and edit shifts. Manager inclusion is optional per roster.
    - Publish when ready. Managers may keep editing afterward; staff continue to see the last published snapshot until it is published again.
    - Managers cannot access departments or wards outside their assignments. This is checked by the API, not only hidden in the interface.
 3. **Staff**
@@ -108,8 +108,8 @@ All API responses are JSON. Authenticated routes use the session cookie. Mutatin
 | `GET /api/roster-scopes` | List current manager assignments; manager only |
 | `GET /api/rosters/:department/:year/:month?ward=...` | Read a manager's draft or an eligible staff member's published snapshot |
 | `POST /api/rosters` | Create a draft in an assigned scope; manager only |
-| `GET /api/rosters/:id/staff-options` | List eligible registered staff not already on draft; manager only |
-| `POST /api/rosters/:id/staff` | Add a staff account to the draft; manager only |
+| `GET /api/rosters/:id/staff-options` | List eligible registered staff and managers assigned to that exact roster scope who are not already on draft; manager only |
+| `POST /api/rosters/:id/staff` | Add a staff account or manager assigned to that exact roster scope to the draft; manager only |
 | `DELETE /api/rosters/:id/staff/:userId` | Remove a staff member from the draft; manager only |
 | `PUT /api/rosters/:id/staff/order` | Save draft roster ordering; manager only |
 | `PUT /api/rosters/:id/entries` | Save one validated draft shift; manager only |
